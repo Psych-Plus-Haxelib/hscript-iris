@@ -283,6 +283,11 @@ class Printer {
 				expr(it);
 				add(" ) ");
 				expr(e);
+			case EForKeyValue(key, value, it, e):
+				add("for( " + key + " => " + value + " in ");
+				expr(it);
+				add(" ) ");
+				expr(e);
 			case EBreak:
 				add("break");
 			case EContinue:

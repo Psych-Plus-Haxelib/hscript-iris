@@ -535,6 +535,9 @@ class Interp {
 			case EFor(v, it, e):
 				forLoop(v, it, e);
 				return null;
+			case EForKeyValue(key, value, it, e):
+				forKeyValueLoop(key, value, it, e);
+				return null;
 			case EBreak:
 				throw SBreak;
 			case EContinue:
@@ -875,6 +878,15 @@ class Interp {
 		return v;
 	}
 
+	function makeKeyValueIterator(v: Dynamic): Iterator<Dynamic> {
+		try
+			v = v.keyValueIterator()
+		catch (e:Dynamic) {};
+		if (v == null || v.hasNext == null || v.next == null)
+			error(EInvalidIterator(v));
+		return v;
+	}
+
 	function forLoop(n, it, e) {
 		var old = declared.length;
 		declared.push({n: n, old: locals.get(n)});
@@ -892,6 +904,30 @@ class Interp {
 						break;
 					case SReturn:
 						throw err;
+				}
+			}
+		}
+		restore(old);
+	}
+
+	function forKeyValueLoop(key, value, it, e) {
+		var old = declared.length;
+		declared.push({n: key, old: locals.get(key)});
+		declared.push({n: value, old: locals.get(value)});
+		var it = makeKeyValueIterator(expr(it));
+		var hasNext = it.hasNext;
+		var next = it.next;
+		while (hasNext()) {
+			var pair:Dynamic = next();
+			locals.set(key, {r: Reflect.field(pair, "key"), const: false});
+			locals.set(value, {r: Reflect.field(pair, "value"), const: false});
+			try {
+				expr(e);
+			} catch (err:Stop) {
+				switch (err) {
+					case SContinue:
+					case SBreak: break;
+					case SReturn: throw err;
 				}
 			}
 		}

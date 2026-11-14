@@ -245,6 +245,16 @@ class Macro {
 					#else
 					EFor(v, convert(it), convert(efor));
 					#end
+				case EForKeyValue(key, value, it, efor):
+					#if (haxe_ver >= 4)
+					var p = #if (!macro && hscriptPos) {file: p.file, min: e.pmin, max: e.pmax} #else p #end;
+					var keyExpr = {expr: EConst(CIdent(key)), pos: p};
+					var valueExpr = {expr: EConst(CIdent(value)), pos: p};
+					var pairExpr = {expr: EBinop(OpArrow, keyExpr, valueExpr), pos: p};
+					EFor({expr: EBinop(OpIn, pairExpr, convert(it)), pos: p}, convert(efor));
+					#else
+					throw EInvalidExpr('Key-value for loops require Haxe 4');
+					#end
 				case EBreak:
 					EBreak;
 				case EContinue:

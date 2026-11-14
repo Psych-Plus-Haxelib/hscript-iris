@@ -59,6 +59,7 @@ enum abstract BytesExpr(ByteInt) from ByteInt to ByteInt {
 	var EEnum = 28;
 	var EDirectValue = 29;
 	var EUsing = 30;
+	var EForKeyValue = 31;
 }
 
 enum abstract BytesConst(ByteInt) from ByteInt to ByteInt {
@@ -311,6 +312,8 @@ class Bytes {
 				bout.addString("EWhile");
 			case EFor:
 				bout.addString("EFor");
+			case EForKeyValue:
+				bout.addString("EForKeyValue");
 			case EBreak:
 				bout.addString("EBreak");
 			case EContinue:
@@ -427,6 +430,12 @@ class Bytes {
 			case EFor(v, it, e):
 				doEncodeExprType(EFor);
 				doEncodeString(v);
+				doEncode(it);
+				doEncode(e);
+			case EForKeyValue(key, value, it, e):
+				doEncodeExprType(EForKeyValue);
+				doEncodeString(key);
+				doEncodeString(value);
 				doEncode(it);
 				doEncode(e);
 			case EBreak:
@@ -612,6 +621,11 @@ class Bytes {
 				var v = doDecodeString();
 				var it = doDecode();
 				EFor(v, it, doDecode());
+			case EForKeyValue:
+				var key = doDecodeString();
+				var value = doDecodeString();
+				var it = doDecode();
+				EForKeyValue(key, value, it, doDecode());
 			case EBreak:
 				EBreak;
 			case EContinue:

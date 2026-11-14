@@ -61,6 +61,9 @@ class Tools {
 			case EFor(_, it, e):
 				f(it);
 				f(e);
+			case EForKeyValue(_, _, it, e):
+				f(it);
+				f(e);
 			case EBreak, EContinue:
 			case EFunction(_, e, _, _):
 				f(e);
@@ -122,6 +125,7 @@ class Tools {
 			case EWhile(c, e): EWhile(f(c), f(e));
 			case EDoWhile(c, e): EDoWhile(f(c), f(e));
 			case EFor(v, it, e): EFor(v, f(it), f(e));
+			case EForKeyValue(key, value, it, e): EForKeyValue(key, value, f(it), f(e));
 			case EFunction(args, e, name, t): EFunction(args, f(e), name, t);
 			case EReturn(e): EReturn(if (e != null) f(e) else null);
 			case EArray(e, i): EArray(f(e), f(i));

@@ -1196,6 +1196,14 @@ class Checker {
 				typeExpr(e, NoValue);
 				this.locals = locals;
 				return TVoid;
+			case EForKeyValue(key, value, it, e):
+				var locals = saveLocals();
+				typeExpr(it, Value);
+				this.locals.set(key, makeMono());
+				this.locals.set(value, makeMono());
+				typeExpr(e, NoValue);
+				this.locals = locals;
+				return TVoid;
 			case EBinop(op, e1, e2):
 				switch (op) {
 					case "&", "|", "^", ">>", ">>>", "<<":

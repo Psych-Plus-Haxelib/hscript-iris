@@ -74,6 +74,7 @@ enum Expr
 	EIf(cond:Expr, e1:Expr, ?e2:Expr);
 	EWhile(cond:Expr, e:Expr);
 	EFor(v:String, it:Expr, e:Expr);
+	EForKeyValue(key:String, value:String, it:Expr, e:Expr);
 	EBreak;
 	EContinue;
 	EFunction(args:Array<Argument>, e:Expr, ?name:String, ?ret:CType);

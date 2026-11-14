@@ -343,7 +343,7 @@ class Parser {
 			case EUnop(_, prefix, e): !prefix && isBlock(e);
 			case EWhile(_, e): isBlock(e);
 			case EDoWhile(_, e): isBlock(e);
-			case EFor(_, _, e): isBlock(e);
+			case EFor(_, _, e) | EForKeyValue(_, _, _, e): isBlock(e);
 			case EReturn(e): e != null && isBlock(e);
 			case ETry(_, _, _, e): isBlock(e);
 			case EMeta(_, _, e): isBlock(e);
@@ -529,7 +529,7 @@ class Parser {
 				}
 				if (a.length == 1 && a[0] != null)
 					switch (expr(a[0])) {
-						case EFor(_), EWhile(_), EDoWhile(_):
+						case EFor(_) | EForKeyValue(_, _), EWhile(_), EDoWhile(_):
 							var tmp = "__a_" + (uid++);
 							var e = mk(EBlock([
 								mk(EVar(tmp, null, mk(EArrayDecl([]), p1)), p1),
@@ -693,11 +693,14 @@ class Parser {
 			case "for":
 				ensure(TPOpen);
 				var vname = getIdent();
+				var keyValueName:String = null;
+				if (maybe(TOp("=>")))
+					keyValueName = getIdent();
 				ensureToken(TId("in"));
 				var eiter = parseExpr();
 				ensure(TPClose);
 				var e = parseExpr();
-				mk(EFor(vname, eiter, e), p1, pmax(e));
+				mk(keyValueName == null ? EFor(vname, eiter, e) : EForKeyValue(vname, keyValueName, eiter, e), p1, pmax(e));
 			case "break": mk(EBreak);
 			case "continue": mk(EContinue);
 			case "else": unexpected(TId(id));

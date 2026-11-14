@@ -147,7 +147,7 @@ class Async {
 				return currentBreak(e);
 			case EContinue if (currentLoop != null):
 				return block([retNull(currentLoop, e), mk(EReturn(), e)], e);
-			case EFor(_), EWhile(_):
+			case EFor(_) | EForKeyValue(_, _), EWhile(_):
 				var oldLoop = currentLoop, oldBreak = currentBreak;
 				currentLoop = null;
 				currentBreak = null;
@@ -327,6 +327,28 @@ class Async {
 					fun("_", block([
 						mk(EIf(mk(EUnop("!", true, call(field(it, "hasNext", it), [], it)), it), currentBreak(it)), it),
 						mk(EVar(v, call(field(it, "next", it), [], it)), it),
+						toCps(eloop, loop, exit),
+					], it), "_loop" + id),
+					retNull(loop, e),
+				], e);
+				currentLoop = oldLoop;
+				currentBreak = oldBreak;
+				return efor;
+			case EForKeyValue(key, value, eit, eloop):
+				var id = ++uid;
+				var it = ident("_i" + id, e);
+				var pair = ident("_pair" + id, e);
+				var oldLoop = currentLoop, oldBreak = currentBreak;
+				var loop = ident("_loop" + id, e);
+				currentLoop = loop;
+				currentBreak = function(inf) return block([retNull(rest, inf), mk(EReturn(), inf)], inf);
+				var efor = block([
+					mk(EVar("_i" + id, call(ident("makeKeyValueIterator", eit), [eit], eit)), eit),
+					fun("_", block([
+						mk(EIf(mk(EUnop("!", true, call(field(it, "hasNext", it), [], it)), it), currentBreak(it)), it),
+						mk(EVar("_pair" + id, call(field(it, "next", it), [], it)), it),
+						mk(EVar(key, field(pair, "key", pair)), pair),
+						mk(EVar(value, field(pair, "value", pair)), pair),
 						toCps(eloop, loop, exit),
 					], it), "_loop" + id),
 					retNull(loop, e),
